@@ -80,20 +80,25 @@ class MainWindow(Gtk.Window):
 
     def __constructMainGrid(self):
         self.mainGrid = Gtk.Grid()
+        
         self.leftGrid = Gtk.Grid()
         self.rightGrid = Gtk.Grid()
+        self.mainGrid.attach(self.leftGrid,0,0,1,1)
+        self.mainGrid.attach(self.rightGrid,1,0,1,1)
 
         self.buttonGrid = Gtk.Grid()
-        self.mainGrid.attach(self.buttonGrid,0,0,1,1)
-
+        self.leftGrid.attach(self.buttonGrid,0,0,1,1)
         self.speakerGrid = Gtk.Grid()
-        self.mainGrid.attach(self.speakerGrid,0,1,1,1)
-        self.designBox = Gtk.Grid(column_homogeneous=True, row_homogeneous=True)
-        self.mainGrid.attach(self.designBox,1,0,1,1)
-        self.graphBox = Gtk.Box()
-        self.mainGrid.attach(self.graphBox,1,1,1,1)
+        self.leftGrid.attach(self.speakerGrid,0,1,1,1)
 
-    # design grid
+        self.designBox = Gtk.Grid(column_homogeneous=True, row_homogeneous=True)
+        self.rightGrid.attach(self.designBox,0,0,1,1)
+        self.graphBox = Gtk.Box()
+        self.rightGrid.attach(self.graphBox,0,1,1,1)
+
+
+
+    # design preview
 
     def __constructPreview(self):
         import matplotlib 
@@ -105,59 +110,9 @@ class MainWindow(Gtk.Window):
         figure = d.draw(show = False)
         import matplotlib.pyplot as plt  # type: ignore
         canvas = FigureCanvas(figure.fig)  # a Gtk.DrawingArea
-        canvas.set_size_request(600, 600)
+        canvas.set_size_request(600, 400)
         self.designBox.add(canvas)
         self.show_all()
-
-    def __constructDesignGrid(self):
-        if self.squares[0] == []:
-            for i in range(self.xRange):
-                for j in range(self.yRange):
-                    eventBox = GridSquare(i,j)
-                    eventBox.connect("event", self.__hoverButton)
-                    eventBox.connect("button-press-event", self.__gridClicked)
-                    self.designGrid.attach(eventBox, i, j, 1, 1)
-                    self.squares[i].append(eventBox)
-            self.designGrid.set_row_spacing(0)
-        for i in range(self.xRange):
-            for j in range(self.yRange):
-                box = self.squares[i][j]
-                if self.waiting:
-                    box = self.squares[self.lastCoordinate[0]][self.lastCoordinate[1]]
-                    if box.get_child(): box.remove(box.get_child())
-                    box.add(Gtk.Image.new_from_file('icons/orange.png'))
-                elif box.selected:
-                    if box.get_child(): box.remove(box.get_child())
-                    box.add(Gtk.Image.new_from_file('icons/white.png'))
-                else: 
-                    if box.get_child(): box.remove(box.get_child())
-                    box.add(Gtk.Image.new_from_file('icons/grey.png'))
-        self.show_all()
-
-    def __hoverButton(self, widget : GridSquare, third):
-        return
-
-    def __gridClicked(self, widget : GridSquare, x):
-        print("lastCoordinate",self.lastCoordinate,"pos",widget.pos)
-        if self.waiting == False:
-            self.waiting = True
-            self.lastCoordinate = widget.pos
-            self.__constructDesignGrid()
-            return
-        widget.clicked = False
-        self.waiting = False
-
-        minimum = min(self.lastCoordinate[1],widget.pos[1])
-        maximum = max(self.lastCoordinate[1],widget.pos[1])
-        for i in range(min(minimum, maximum),max(minimum, maximum)+1):
-            box = self.squares[self.lastCoordinate[0]][i]
-            box.selected = True
-        minimum = min(self.lastCoordinate[0],widget.pos[0])
-        maximum = max(self.lastCoordinate[0],widget.pos[0])
-        for i in range(min(minimum, maximum),max(minimum, maximum)+1):
-            box = self.squares[i][widget.pos[1]]
-            box.selected = True
-        self.__constructDesignGrid()
 
     # component buttons
 
