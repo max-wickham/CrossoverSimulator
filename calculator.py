@@ -61,10 +61,9 @@ class Speaker(Component):
 
 class Circuit:
 
-    components : List[Component]
-    nodes : int
-
     def __init__(self,components : List[Component]):
+        self.components : List[Component] = []
+        self.nodes : int = 0
         self.components = components
         self.nodes = max([max(x.node0,x.node1) for x in self.components]) + 1
 
@@ -94,10 +93,8 @@ class Circuit:
 
 class CrossOver:
 
-    circuit : Circuit
-    speakers : List[Speaker] = []
-
     def __init__(self, netlist : str):
+        self.speakers : List[Speaker] = []
         self.circuit = self.__parseNetlist(netlist)
 
 
